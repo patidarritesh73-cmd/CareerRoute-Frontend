@@ -7,7 +7,12 @@ function JobCard({ job, onDelete, deleting }) {
       <h2>{job.title}</h2>
       <p>Company: {job.company}</p>
       <p>Location: {job.location}</p>
-      <p>Experience: {job.experience}</p>
+      <p>
+  Experience: {job.experience.min} - {job.experience.max} years
+</p>
+<p>
+  Salary: ₹{job.salary.min} - ₹{job.salary.max}
+</p>
 
       <Link to={`/jobs/${job.id}`}>
         View Details

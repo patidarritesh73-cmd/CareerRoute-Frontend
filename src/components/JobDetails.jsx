@@ -78,8 +78,12 @@ function JobDetails() {
       <p>Company: {job.company}</p>
       <p>Location: {job.location}</p>
       <p>Employment Type: {job.employmentType}</p>
-      <p>Experience: {job.experience}</p>
-      <p>Salary: {job.salary}</p>
+      <p>
+  Experience: {job.experience?.min} - {job.experience?.max} years
+</p>
+      <p>
+  Salary: {job.salary?.min} - {job.salary?.max} LPA
+</p>
       <p>Skills: {job.skills?.join(", ")}</p>
       <p>Description: {job.description}</p>
 

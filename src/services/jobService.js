@@ -1,157 +1,96 @@
+import API_BASE_URL from "../config/api";
+export async function getJobs() {
+  const response = await fetch(
+    `${API_BASE_URL}/jobs`
+  );
 
-import jobs from "../data/jobs";
+  if (!response.ok) {
+    throw new Error("Failed to fetch jobs");
+  }
 
-const STORAGE_KEY = "careerconnect_jobs";
+  const result = await response.json();
 
-function loadJobs() {
-  try {
-    const savedJobs = localStorage.getItem(STORAGE_KEY);
+  return result.data;
+}
 
-    if (savedJobs !== null) {
-      const parsedJobs = JSON.parse(savedJobs);
 
-      if (Array.isArray(parsedJobs)) {
-        return parsedJobs;
-      }
+export async function getJobById(jobId) {
+  const response = await fetch(
+    `${API_BASE_URL}/jobs/${jobId}`
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to fetch job"
+    );
+  }
+
+  return result.data;
+}
+
+export async function createJob(jobData) {
+  const response = await fetch(
+    `${API_BASE_URL}/jobs`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(jobData),
     }
-  } catch (error) {
-    console.error("Failed to load jobs:", error);
-  }
-
-  return [...jobs];
-}
-
-let jobStore = loadJobs();
-
-function saveJobs() {
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(jobStore)
-    );
-  } catch (error) {
-    console.error("Failed to save jobs:", error);
-    throw new Error("Could not save jobs in this browser.");
-  }
-}
-
-function simulateRequest(data, errorMessage = "") {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (errorMessage) {
-        reject(new Error(errorMessage));
-        return;
-      }
-
-      resolve(data);
-    }, 800);
-  });
-}
-
-export function getJobs() {
-  return simulateRequest([...jobStore]);
-}
-
-export function getJobById(jobId) {
-  const job = jobStore.find(
-    (item) => String(item.id) === String(jobId)
   );
 
-  if (!job) {
-    return simulateRequest(
-      null,
-      `Job with ID ${jobId} was not found.`
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to create job"
     );
   }
 
-  return simulateRequest(job);
+  return result.data;
 }
 
-export function createJob(jobData) {
-  const newId =
-    jobStore.length > 0
-      ? Math.max(...jobStore.map((item) => Number(item.id))) + 1
-      : 1;
-
-  const newJob = {
-    ...jobData,
-    id: newId,
-  };
-
-  const previousStore = jobStore;
-  jobStore = [...jobStore, newJob];
-
-  try {
-    saveJobs();
-  } catch (error) {
-    jobStore = previousStore;
-    return simulateRequest(null, error.message);
-  }
-
-  return simulateRequest(newJob);
-}
-
-export function updateJob(jobId, updatedData) {
-  const jobExists = jobStore.some(
-    (item) => String(item.id) === String(jobId)
+export async function updateJob(jobId, updatedData) {
+  const response = await fetch(
+    `${API_BASE_URL}/jobs/${jobId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    }
   );
 
-  if (!jobExists) {
-    return simulateRequest(
-      null,
-      `Job with ID ${jobId} was not found.`
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to update job"
     );
   }
 
-  const previousStore = jobStore;
-
-  jobStore = jobStore.map((item) =>
-    String(item.id) === String(jobId)
-      ? { ...item, ...updatedData, id: item.id }
-      : item
-  );
-
-  try {
-    saveJobs();
-  } catch (error) {
-    jobStore = previousStore;
-    return simulateRequest(null, error.message);
-  }
-
-  const updatedJob = jobStore.find(
-    (item) => String(item.id) === String(jobId)
-  );
-
-  return simulateRequest(updatedJob);
+  return result.data;
 }
 
-export function deleteJob(jobId) {
-  const jobExists = jobStore.some(
-    (item) => String(item.id) === String(jobId)
+export async function deleteJob(jobId) {
+  const response = await fetch(
+    `${API_BASE_URL}/jobs/${jobId}`,
+    {
+      method: "DELETE",
+    }
   );
 
-  if (!jobExists) {
-    return simulateRequest(
-      null,
-      `Job with ID ${jobId} was not found.`
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to delete job"
     );
   }
 
-  const previousStore = jobStore;
-
-  jobStore = jobStore.filter(
-    (item) => String(item.id) !== String(jobId)
-  );
-
-  try {
-    saveJobs();
-  } catch (error) {
-    jobStore = previousStore;
-    return simulateRequest(null, error.message);
-  }
-
-  return simulateRequest({
-    message: "Job deleted successfully.",
-    id: jobId,
-  });
+  return result;
 }
