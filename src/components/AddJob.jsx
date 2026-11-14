@@ -7,15 +7,17 @@ function AddJob() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    title: "",
-    company: "",
-    location: "",
-    employmentType: "Full-time",
-    experience: "",
-    salary: "",
-    skills: "",
-    description: "",
-  });
+  title: "",
+  company: "",
+  location: "",
+  employmentType: "Full-time",
+  experienceMin: "",
+  experienceMax: "",
+  salaryMin: "",
+  salaryMax: "",
+  skills: "",
+  description: "",
+});
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,40 +39,64 @@ function AddJob() {
       !formData.title.trim() ||
       !formData.company.trim() ||
       !formData.location.trim() ||
-      !formData.experience.trim() ||
+      !formData.experienceMin ||
+!formData.experienceMax ||
       !formData.description.trim()
     ) {
       setError("Please fill in all required fields.");
       return;
     }
-
-    
-const experience = Number(formData.experience);
+const experienceMin = Number(formData.experienceMin);
+const experienceMax = Number(formData.experienceMax);
 
 if (
-  !Number.isFinite(experience) ||
-  experience < 0 ||
-  experience > 50
+  experienceMin < 0 ||
+  experienceMax < experienceMin ||
+  experienceMax > 50
 ) {
-  setError("Experience must be between 0 and 50 years.");
+  setError("Please enter a valid experience range (0–50 years).");
+  return;
+}
+const salaryMin = Number(formData.salaryMin);
+const salaryMax = Number(formData.salaryMax);
+
+if (
+  !formData.salaryMin ||
+  !formData.salaryMax ||
+  !Number.isFinite(salaryMin) ||
+  !Number.isFinite(salaryMax) ||
+  salaryMin <= 0 ||
+  salaryMax < salaryMin
+) {
+  setError("Please enter a valid salary range.");
   return;
 }
 
 
-    const jobData = {
-      ...formData,
-      title: formData.title.trim(),
-      company: formData.company.trim(),
-      location: formData.location.trim(),
-      experience,
-      salary: formData.salary.trim(),
-      skills: formData.skills
-        .split(",")
-        .map((skill) => skill.trim())
-        .filter(Boolean),
-      description: formData.description.trim(),
-    };
+   const jobData = {
+  title: formData.title.trim(),
+  company: formData.company.trim(),
+  location: formData.location.trim(),
+  employmentType: formData.employmentType,
 
+  experience: {
+    min: experienceMin,
+    max: experienceMax,
+  },
+
+  salary: {
+    min: salaryMin,
+    max: salaryMax,
+    currency: "INR",
+  },
+
+  skills: formData.skills
+    .split(",")
+    .map((skill) => skill.trim())
+    .filter(Boolean),
+
+  description: formData.description.trim(),
+};
     setLoading(true);
 
     try {
@@ -131,26 +157,53 @@ if (
           <option value="Contract">Contract</option>
         </select>
 
-        <label htmlFor="experience">Experience (years) *</label>
-        <input
-          id="experience"
-          name="experience"
-          type="number"
-          min="0"
-          step="0.5"
-          value={formData.experience}
-          onChange={handleChange}
-          required
-        />
+        <label htmlFor="experienceMin">Minimum Experience (years) *</label>
+<input
+  id="experienceMin"
+  name="experienceMin"
+  type="number"
+  min="0"
+  max="50"
+  step="0.5"
+  value={formData.experienceMin}
+  onChange={handleChange}
+  required
+/>
 
-        <label htmlFor="salary">Salary</label>
-        <input
-          id="salary"
-          name="salary"
-          value={formData.salary}
-          onChange={handleChange}
-          placeholder="e.g. ₹4–6 LPA"
-        />
+<label htmlFor="experienceMax">Maximum Experience (years) *</label>
+<input
+  id="experienceMax"
+  name="experienceMax"
+  type="number"
+  min="0"
+  max="50"
+  step="0.5"
+  value={formData.experienceMax}
+  onChange={handleChange}
+  required
+/>
+
+        <label htmlFor="salaryMin">Minimum Salary (₹ per year) *</label>
+<input
+  id="salaryMin"
+  name="salaryMin"
+  type="number"
+  min="1"
+  value={formData.salaryMin}
+  onChange={handleChange}
+  required
+/>
+
+<label htmlFor="salaryMax">Maximum Salary (₹ per year) *</label>
+<input
+  id="salaryMax"
+  name="salaryMax"
+  type="number"
+  min="1"
+  value={formData.salaryMax}
+  onChange={handleChange}
+  required
+/>
 
         <label htmlFor="skills">Skills</label>
         <input

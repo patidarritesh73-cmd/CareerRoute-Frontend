@@ -8,10 +8,14 @@ function JobCard({ job, onDelete, deleting }) {
       <p>Company: {job.company}</p>
       <p>Location: {job.location}</p>
       <p>
-  Experience: {job.experience.min} - {job.experience.max} years
+  Experience: {job.experience?.min ?? "N/A"} -{" "}
+  {job.experience?.max ?? "N/A"} years
 </p>
+
 <p>
-  Salary: ₹{job.salary.min} - ₹{job.salary.max}
+  Salary: {job.salary?.min != null && job.salary?.max != null
+    ? `${new Intl.NumberFormat("en-IN").format(job.salary.min)} - ${new Intl.NumberFormat("en-IN").format(job.salary.max)} ${job.salary.currency || "INR"}`
+    : "Not specified"}
 </p>
 
       <Link to={`/jobs/${job.id}`}>
